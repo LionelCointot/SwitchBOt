@@ -1,0 +1,25 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": 
+	{
+
+		"python.envFile": "${workspaceFolder}/.env",
+		"python.autoComplete.addBrackets": true,
+		"python.analysis.completeFunctionParens": true,
+		"python.linting.flakesEnabled": true,
+		"audioCues.diffLineDeleted": "off",
+		"audioCues.diffLineInserted": "off",
+		"audioCues.diffLineModified": "off",
+		"audioCues.lineHasBreakpoint": "off",
+		"audioCues.lineHasError": "off",
+		"audioCues.lineHasFoldedArea": "off",
+		"audioCues.lineHasInlineSuggestion": "off",
+	},
+	"python":{
+
+	}
+}

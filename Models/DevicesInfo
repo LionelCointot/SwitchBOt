@@ -1,0 +1,92 @@
+from collections.abc import Callable
+from dataclasses import dataclass, field, fields
+import json
+from typing import Any, Annotated, List,Dict, get_type_hints, Tuple
+from inspect import get_annotations
+from abc import ABC, abstractmethod
+from pydantic import BaseModel, Field
+@dataclass()
+class JsonProperty:
+
+    PropertyName : str
+
+    
+
+def serializable(cls:object):
+
+    _serialize_mapping = {
+    }
+
+    _deserialize_mapping = {
+    }
+
+
+    annotations : Dict[str, Annotated] = get_type_hints(cls, include_extras=True)
+
+    data_fields: Tuple(fields) = fields(cls)
+    for property in data_fields:
+        metadata = property.metadata
+        for k,v in metadata.items():
+            if isinstance(v, JsonProperty):
+                _serialize_mapping[property.name]=v.PropertyName
+                _deserialize_mapping[v.PropertyName]=property.name
+
+    def to_json(self):
+        json_data = {}
+        for attr_name, attr_value in self.__dict__.items():
+            if attr_name in self._serialize_mapping:
+                attr_name = self._serialize_mapping[attr_name]
+            json_data[attr_name] = attr_value
+        return json_data
+
+    @classmethod
+    def from_json(cls:type, data):
+        newdata = {}
+        for attr_name, attr_value in data.items():
+            attr_name = cls._deserialize_mapping.get(attr_name, attr_name)
+            newdata[attr_name]=attr_value
+
+        instance = cls(**newdata)
+
+        return instance
+
+    cls.to_json = to_json
+    cls.from_json = from_json
+
+    cls._serialize_mapping = _serialize_mapping
+    cls._deserialize_mapping = _deserialize_mapping
+    return cls
+
+class Point(BaseModel):
+
+    x: int = Field(alias="X")
+    y: int = Field(alias="Y")
+
+    # z: Annotated[int, JsonProperty(PropertyName="Z")]
+    def __str__(self):
+        return f"Point(x={self.x}, y={self.y})"
+
+
+@serializable
+@dataclass
+class Droite:
+
+    p1:Point = field(metadata={"JsonProperty":JsonProperty(PropertyName="Point1")})
+    p2:Point = field()
+
+    def __str__(self):
+        return f"Droite(p1={self.p1}, p2={self.p2})"
+
+def serialize_json(obj):
+    if hasattr(obj, 'to_json'):
+        return obj.to_json()
+    raise TypeError(f"Object of type {type(obj)} is not JSON serializable")
+
+def deserialize_json(json_string, cls):
+    data = json.loads(json_string)
+    return cls.from_json(data)
+
+# On deserialise un point JSON en instance
+
+point_json = '{"X": 10, "Y": 20}'
+point = Point.parse_raw(point_json)

@@ -1,0 +1,6 @@
+{
+    "python":{
+		"python.linting.flakesEnabled": true
+
+}
+}
